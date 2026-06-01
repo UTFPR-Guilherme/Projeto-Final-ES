@@ -32,7 +32,7 @@ O escopo foi definido para ser pequeno, objetivo e completo: o sistema resolve u
 
 ## Divisão Inicial de Responsabilidades
 
-A equipe atua de forma **conjunta em todas as etapas** do projeto (requisitos, implementação, testes e documentação). As responsabilidades abaixo são principais, mas não exclusivas.
+A equipe atua de forma **conjunta em todas as etapas** do projeto (requisitos, implementação, testes e documentação). As responsabilidades abaixo são as principais, mas não exclusivas.
 
 - **Guilherme Pontremolez:** leitura e carregamento dos arquivos `.csv`, validação de CPF e de campos obrigatórios; co-condução dos requisitos; testes e documentação.
 - **Guilherme Ramalho:** validação de e-mail e de registros duplicados, geração do relatório final; pesquisa e validação do problema com fontes reais; testes e documentação.
