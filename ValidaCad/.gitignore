@@ -1,0 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Saídas geradas em tempo de execução
+relatorios/
+
+# Sistema operacional
+.DS_Store

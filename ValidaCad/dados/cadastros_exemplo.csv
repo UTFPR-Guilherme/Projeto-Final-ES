@@ -1,0 +1,6 @@
+id,nome,cpf,email,telefone,data_nascimento
+1,João Silva,529.982.247-25,joao@email.com,43999990000,2000-05-12
+2,Maria Souza,111.111.111-11,mariaemail.com,43988880000,1999-08-20
+3,,123.456.789-00,cliente@email.com,43977770000,2001-01-15
+4,João Silva,529.982.247-25,joao@email.com,43999990000,2000-05-12
+5,Ana Lima,168.995.350-09,ana@email.com,43966660000,1995-03-30
