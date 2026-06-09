@@ -41,31 +41,61 @@ A equipe atua de forma **conjunta em todas as etapas** do projeto (requisitos, i
 ## Estrutura do Repositório
 
 ```
-README.md                  # visão geral, problema, público-alvo e equipe
-docs/
-  requisitos.md            # requisitos, histórias de usuário, elicitação e validação (Sprint 1)
-  arquitetura.md           # arquitetura, padrões de projeto e diagramas (Sprint 2)
-  padroes_codificacao.md   # padrões de codificação e de gestão/qualidade (Sprint 2)
-codigo/
-  dominio/                 # entidades (Registro, ErroValidacao, ResultadoValidacao)
-  infra/                   # leitura do CSV (LeitorCSV)
-  validacao/               # cadeia de validadores (Chain of Responsibility)
-  relatorio/               # geradores de relatório (Factory Method)
-  main.py                  # ponto de entrada e orquestração do pipeline
-dados/                     # CSV de exemplo
+README.md                    # visão geral, problema, público-alvo e equipe (este arquivo)
+ValidaCad/                   # código, documentação e dados do projeto
+  docs/
+    requisitos.md            # requisitos, histórias de usuário, elicitação e validação (Sprint 1)
+    arquitetura.md           # arquitetura, padrões de projeto e diagramas (Sprint 2 e 3)
+    padroes_codificacao.md   # padrões de codificação e de gestão/qualidade (Sprint 2)
+  codigo/
+    dominio/                 # entidades (Registro, ErroValidacao, ResultadoValidacao)
+    infra/                   # leitura do CSV (LeitorCSV)
+    validacao/               # cadeia de validadores (Chain of Responsibility)
+    relatorio/               # geradores de relatório (Factory Method)
+    main.py                  # ponto de entrada e orquestração do pipeline
+  dados/                     # CSVs de exemplo
 ```
 
 ## Sprints do Projeto
 
-Status das sprints concluídas até a entrega de 02/06:
+Status das sprints concluídas:
 
 ### Sprint 1: Engenharia de Requisitos
-**Status: concluída.** Pitch do problema com fontes reais, requisitos funcionais (RF01 a RF08) e não funcionais (RNF01 a RNF06), histórias de usuário com critérios de aceitação e priorização, síntese da elicitação e registro de validação. Tudo em [`docs/requisitos.md`](docs/requisitos.md).
+**Status: concluída.** Pitch do problema com fontes reais, requisitos funcionais (RF01 a RF08) e não funcionais (RNF01 a RNF06), histórias de usuário com critérios de aceitação e priorização, síntese da elicitação e registro de validação. Tudo em [`ValidaCad/docs/requisitos.md`](ValidaCad/docs/requisitos.md).
 
 ### Sprint 2: Projeto da Aplicação (Review 02/06)
 **Status: concluída.** Itens entregues:
 
-- [x] Documentação dos padrões de codificação e de gestão/qualidade, em [`docs/padroes_codificacao.md`](docs/padroes_codificacao.md);
-- [x] Diagrama de arquitetura com componentes, responsabilidades e trade-offs justificados, em [`docs/arquitetura.md`](docs/arquitetura.md);
+- [x] Documentação dos padrões de codificação e de gestão/qualidade, em [`ValidaCad/docs/padroes_codificacao.md`](ValidaCad/docs/padroes_codificacao.md);
+- [x] Diagrama de arquitetura com componentes, responsabilidades e trade-offs justificados, em [`ValidaCad/docs/arquitetura.md`](ValidaCad/docs/arquitetura.md);
 - [x] Diagramas dos dois padrões de projeto (Chain of Responsibility e Factory Method) com classes reais do código;
-- [x] Demonstração funcional inicial no terminal, com o código em [`codigo/`](codigo/) rodando sobre um CSV de exemplo.
+- [x] Demonstração funcional inicial no terminal, com o código em [`ValidaCad/codigo/`](ValidaCad/codigo/) rodando sobre um CSV de exemplo.
+
+### Sprint 3: Desenvolvimento (Review 12/06)
+**Status: concluída.** Implementadas as funcionalidades restantes das histórias de usuário:
+
+- [x] Validação das colunas obrigatórias (RF02): a coluna ausente é reportada uma vez, no nível do arquivo, em vez de linha por linha;
+- [x] Robustez na leitura do CSV para casos de borda (codificação não UTF-8, arquivo apenas com cabeçalho, arquivo inexistente);
+- [x] Demonstração no terminal cobrindo as histórias, incluindo o exemplo [`ValidaCad/dados/cadastros_sem_coluna.csv`](ValidaCad/dados/cadastros_sem_coluna.csv) com uma coluna faltando.
+
+A validação nova entrou como um `ValidadorColunas` na cadeia (Chain of Responsibility), sem alterar os validadores existentes. Detalhes em [`ValidaCad/docs/arquitetura.md`](ValidaCad/docs/arquitetura.md).
+
+## Como Executar
+
+Pré-requisito: Python 3.9 ou superior. O código fica dentro da pasta `ValidaCad/`, então rode a partir dela.
+
+```bash
+cd ValidaCad
+
+# Relatório completo (resumo e detalhamento dos erros)
+python3 -m codigo.main dados/cadastros_exemplo.csv
+
+# Apenas o resumo quantitativo
+python3 -m codigo.main dados/cadastros_exemplo.csv --formato resumido
+
+# Exemplo com uma coluna obrigatória faltando (demonstra o RF02)
+python3 -m codigo.main dados/cadastros_sem_coluna.csv
+
+# Salvando o relatório em um arquivo .txt
+python3 -m codigo.main dados/cadastros_exemplo.csv relatorios/relatorio.txt
+```
