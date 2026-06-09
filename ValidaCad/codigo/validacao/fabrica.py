@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from codigo.validacao.campos_obrigatorios import ValidadorCamposObrigatorios
+from codigo.validacao.colunas import ValidadorColunas
 from codigo.validacao.cpf import ValidadorCPF
 from codigo.validacao.duplicados import ValidadorDuplicados
 from codigo.validacao.email import ValidadorEmail
@@ -17,16 +18,25 @@ class FabricaValidadores:
     """
 
     @staticmethod
-    def criar_cadeia() -> Validador:
-        """Cria os validadores, encadeia-os e devolve o primeiro elo."""
-        obrigatorios = ValidadorCamposObrigatorios()
+    def criar_cadeia(colunas: list[str] | None = None) -> Validador:
+        """Cria os validadores, encadeia-os e devolve o primeiro elo.
+
+        ``colunas`` é o cabeçalho lido do CSV. Ele permite verificar a
+        presença das colunas obrigatórias (RF02) e evitar erro duplicado
+        nos campos obrigatórios.
+        """
+        colunas_presentes = list(colunas) if colunas is not None else None
+
+        colunas_v = ValidadorColunas(colunas_presentes)
+        obrigatorios = ValidadorCamposObrigatorios(colunas_presentes)
         cpf = ValidadorCPF()
         email = ValidadorEmail()
         duplicados = ValidadorDuplicados()
 
-        # obrigatorios -> cpf -> email -> duplicados
+        # colunas -> obrigatorios -> cpf -> email -> duplicados
+        colunas_v.definir_proximo(obrigatorios)
         obrigatorios.definir_proximo(cpf)
         cpf.definir_proximo(email)
         email.definir_proximo(duplicados)
 
-        return obrigatorios
+        return colunas_v

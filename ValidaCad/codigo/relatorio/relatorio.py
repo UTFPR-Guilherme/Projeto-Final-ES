@@ -42,8 +42,10 @@ class RelatorioCompleto(GeradorRelatorio):
             return "\n".join(partes)
         partes.append("\nERROS ENCONTRADOS:\n")
         for erro in resultado.erros:
+            local = ("Cabeçalho do arquivo" if erro.linha == 0
+                     else f"Linha {erro.linha}")
             partes.append(
-                f"Linha {erro.linha}\n"
+                f"{local}\n"
                 f"- Campo: {erro.campo}\n"
                 f"- Erro: {erro.tipo}\n"
                 f"- Valor informado: {erro.valor}\n"

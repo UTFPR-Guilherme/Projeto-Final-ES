@@ -35,3 +35,7 @@ class LeitorCSV:
                 ]
         except FileNotFoundError as exc:
             raise ErroLeitura(f"Arquivo não encontrado: {self.caminho}") from exc
+        except UnicodeDecodeError as exc:
+            raise ErroLeitura(
+                f"Arquivo não está na codificação UTF-8: {self.caminho}"
+            ) from exc

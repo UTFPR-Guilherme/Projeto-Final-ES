@@ -26,7 +26,8 @@ class ResultadoValidacao:
 
     @property
     def linhas_com_erro(self) -> set[int]:
-        return {erro.linha for erro in self._erros}
+        """Linhas de dados com erro (exclui erros de arquivo/cabeçalho, linha 0)."""
+        return {erro.linha for erro in self._erros if erro.linha > 0}
 
     @property
     def total_inconsistencias(self) -> int:
