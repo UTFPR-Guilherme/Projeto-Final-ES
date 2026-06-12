@@ -17,11 +17,13 @@ def executar(caminho_entrada: str, caminho_saida: str | None = None,
              formato: str = "completo") -> str:
     """Executa o pipeline completo e devolve o texto do relatório."""
     # 1. Carregamento e conversão para objetos de domínio
-    registros = LeitorCSV(caminho_entrada).carregar()
+    leitor = LeitorCSV(caminho_entrada)
+    registros = leitor.carregar()
 
-    # 2. Execução da cadeia de validadores (Chain of Responsibility)
+    # 2. Execução da cadeia de validadores (Chain of Responsibility).
+    #    O cabeçalho lido permite verificar as colunas obrigatórias (RF02).
     resultado = ResultadoValidacao(total_registros=len(registros))
-    cadeia = FabricaValidadores.criar_cadeia()
+    cadeia = FabricaValidadores.criar_cadeia(leitor.colunas)
     cadeia.validar(registros, resultado)
 
     # 3. Geração do relatório (Factory Method)

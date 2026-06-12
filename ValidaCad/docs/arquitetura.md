@@ -18,7 +18,7 @@ flowchart LR
     OUT[("Relatório:<br/>terminal / .txt")]
     LEITOR["LeitorCSV<br/>(infra)"]
     ENT["Registro / ErroValidacao /<br/>ResultadoValidacao<br/>(domínio)"]
-    CAD["Cadeia de validadores:<br/>CamposObrigatorios > CPF ><br/>Email > Duplicados<br/>(validação)"]
+    CAD["Cadeia de validadores:<br/>Colunas > CamposObrigatorios ><br/>CPF > Email > Duplicados<br/>(validação)"]
     GR["GeradorRelatorio:<br/>Completo / Resumido<br/>(relatório)"]
     FV["FabricaValidadores"]
     FR["FabricaRelatorio"]
@@ -38,7 +38,7 @@ flowchart LR
 | --- | --- | --- |
 | Infraestrutura, `infra/leitor_csv.py` | `LeitorCSV` | Ler o `.csv` e converter cada linha em um `Registro` |
 | Domínio, `dominio/` | `Registro`, `ErroValidacao`, `Severidade`, `ResultadoValidacao` | Representar os dados e acumular erros e resumo quantitativo |
-| Validação, `validacao/` | `Validador` e 4 validadores concretos | Aplicar as regras de validação (Chain of Responsibility) |
+| Validação, `validacao/` | `Validador` e 5 validadores concretos | Aplicar as regras de validação (Chain of Responsibility) |
 | Validação, `validacao/fabrica.py` | `FabricaValidadores` | Criar e encadear os validadores |
 | Relatório, `relatorio/` | `GeradorRelatorio`, `RelatorioCompleto`, `RelatorioResumido` | Formatar a saída |
 | Relatório, `relatorio/fabrica.py` | `FabricaRelatorio` | Escolher o gerador conforme o formato pedido |
@@ -58,7 +58,7 @@ flowchart LR
 
 **Onde:** `codigo/validacao/`. **Problema que resolve:** o sistema tem várias regras de validação independentes que tendem a crescer; encadeá-las evita um `if/elif` gigante e mantém cada regra isolada e testável.
 
-**Como funciona:** `Validador` é o elo abstrato. Cada validador concreto implementa `_aplicar()` (sua regra) e herda `validar()`, que executa a regra e **delega ao próximo elo** (`_proximo`). A `FabricaValidadores` define a ordem: `CamposObrigatorios`, `CPF`, `Email`, `Duplicados`.
+**Como funciona:** `Validador` é o elo abstrato. Cada validador concreto implementa `_aplicar()` (sua regra) e herda `validar()`, que executa a regra e **delega ao próximo elo** (`_proximo`). A `FabricaValidadores` define a ordem: `Colunas`, `CamposObrigatorios`, `CPF`, `Email`, `Duplicados`.
 
 ```mermaid
 classDiagram
@@ -68,6 +68,10 @@ classDiagram
         +definir_proximo(proximo) Validador
         +validar(registros, resultado)
         #_aplicar(registros, resultado)*
+    }
+    class ValidadorColunas {
+        +COLUNAS_OBRIGATORIAS
+        #_aplicar(registros, resultado)
     }
     class ValidadorCamposObrigatorios {
         +CAMPOS_OBRIGATORIOS
@@ -84,6 +88,7 @@ classDiagram
     class ValidadorDuplicados {
         #_aplicar(registros, resultado)
     }
+    Validador <|-- ValidadorColunas
     Validador <|-- ValidadorCamposObrigatorios
     Validador <|-- ValidadorCPF
     Validador <|-- ValidadorEmail
@@ -94,8 +99,8 @@ classDiagram
 | Papel no padrão | Classe real | Arquivo |
 | --- | --- | --- |
 | Handler (abstrato) | `Validador` | `validacao/validador.py` |
-| Handlers concretos | `ValidadorCamposObrigatorios`, `ValidadorCPF`, `ValidadorEmail`, `ValidadorDuplicados` | `validacao/*.py` |
-| Montagem da cadeia | `FabricaValidadores.criar_cadeia()` | `validacao/fabrica.py` |
+| Handlers concretos | `ValidadorColunas`, `ValidadorCamposObrigatorios`, `ValidadorCPF`, `ValidadorEmail`, `ValidadorDuplicados` | `validacao/*.py` |
+| Montagem da cadeia | `FabricaValidadores.criar_cadeia(colunas)` | `validacao/fabrica.py` |
 
 ## 3. Padrão 2: Factory Method
 
@@ -119,7 +124,7 @@ classDiagram
         +criar(formato)$ GeradorRelatorio
     }
     class FabricaValidadores {
-        +criar_cadeia()$ Validador
+        +criar_cadeia(colunas)$ Validador
     }
     GeradorRelatorio <|-- RelatorioCompleto
     GeradorRelatorio <|-- RelatorioResumido
@@ -132,9 +137,9 @@ classDiagram
 | Creator (relatórios) | `FabricaRelatorio.criar(formato)` | `relatorio/fabrica.py` |
 | Produto abstrato | `GeradorRelatorio` | `relatorio/relatorio.py` |
 | Produtos concretos | `RelatorioCompleto`, `RelatorioResumido` | `relatorio/relatorio.py` |
-| Creator (validadores) | `FabricaValidadores.criar_cadeia()` | `validacao/fabrica.py` |
+| Creator (validadores) | `FabricaValidadores.criar_cadeia(colunas)` | `validacao/fabrica.py` |
 
-> Para adicionar um formato `json`, basta criar `RelatorioJson(GeradorRelatorio)` e registrá-lo em `FabricaRelatorio._FORMATOS`; nenhuma outra parte do sistema muda.
+> Para adicionar um formato `json`, basta criar `RelatorioJson(GeradorRelatorio)` e registrá-lo em `FabricaRelatorio._FORMATOS`; nenhuma outra parte do sistema muda. O mesmo vale para uma nova regra: cria-se um `Validador` e registra-se na `FabricaValidadores`.
 
 ## 4. Demonstração funcional no terminal
 
@@ -195,6 +200,31 @@ Linha 5
 - Campo: email
 - Erro: E-mail duplicado
 - Valor informado: joao@email.com
+- Severidade: crítica
+```
+
+### Validação de colunas (RF02)
+
+Para demonstrar a checagem de colunas obrigatórias, o arquivo `dados/cadastros_sem_coluna.csv` não tem a coluna `email`. O problema é reportado uma vez, no nível do arquivo (cabeçalho), sem se repetir por linha:
+
+```bash
+python3 -m codigo.main dados/cadastros_sem_coluna.csv
+```
+
+```txt
+RELATÓRIO DE VALIDAÇÃO DE CADASTROS
+
+Total de registros analisados: 2
+Registros válidos: 2
+Registros com erro: 0
+Total de inconsistências encontradas: 1
+
+ERROS ENCONTRADOS:
+
+Cabeçalho do arquivo
+- Campo: email
+- Erro: Coluna obrigatória ausente
+- Valor informado: (coluna não existe no arquivo)
 - Severidade: crítica
 ```
 
