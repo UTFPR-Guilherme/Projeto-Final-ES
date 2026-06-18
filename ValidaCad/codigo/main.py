@@ -6,6 +6,7 @@ Uso:
 from __future__ import annotations
 
 import sys
+from pathlib import Path
 
 from codigo.dominio.resultado import ResultadoValidacao
 from codigo.infra.leitor_csv import ErroLeitura, LeitorCSV
@@ -30,8 +31,10 @@ def executar(caminho_entrada: str, caminho_saida: str | None = None,
     relatorio = FabricaRelatorio.criar(formato).gerar(resultado)
 
     if caminho_saida:
-        with open(caminho_saida, "w", encoding="utf-8") as arquivo:
-            arquivo.write(relatorio + "\n")
+        caminho = Path(caminho_saida)
+        if caminho.parent != Path("."):
+            caminho.parent.mkdir(parents=True, exist_ok=True)
+        caminho.write_text(relatorio + "\n", encoding="utf-8")
 
     return relatorio
 

@@ -53,6 +53,7 @@ ValidaCad/                   # código, documentação e dados do projeto
     validacao/               # cadeia de validadores (Chain of Responsibility)
     relatorio/               # geradores de relatório (Factory Method)
     main.py                  # ponto de entrada e orquestração do pipeline
+  testes/                    # testes automatizados da Sprint 4
   dados/                     # CSVs de exemplo
 ```
 
@@ -80,9 +81,20 @@ Status das sprints concluídas:
 
 A validação nova entrou como um `ValidadorColunas` na cadeia (Chain of Responsibility), sem alterar os validadores existentes. Detalhes em [`ValidaCad/docs/arquitetura.md`](ValidaCad/docs/arquitetura.md).
 
+### Sprint 4: Testes e Refatoração (Review 19/06)
+**Status: concluída.** Foram adicionados testes automatizados com `unittest`, cobrindo métodos relevantes com casos de sucesso, falha e borda.
+
+- [x] Testes de `ValidadorCPF.cpf_valido`;
+- [x] Testes de `ValidadorEmail.validar`;
+- [x] Testes de `ValidadorDuplicados.validar`;
+- [x] Teste da função `executar` com gravação do relatório em pasta inexistente;
+- [x] Refatoração da saída para criar automaticamente a pasta do relatório;
+- [x] Refatoração da duplicidade de CPF para comparar apenas os dígitos;
+- [x] Documentação da estratégia de testes em [`ValidaCad/docs/estrategia_testes.md`](ValidaCad/docs/estrategia_testes.md).
+
 ## Como Executar
 
-Pré-requisito: Python 3.9 ou superior. O código fica dentro da pasta `ValidaCad/`, então rode a partir dela.
+Pré-requisito: Python 3.10 ou superior. O código fica dentro da pasta `ValidaCad/`, então rode a partir dela.
 
 ```bash
 cd ValidaCad
@@ -98,4 +110,25 @@ python3 -m codigo.main dados/cadastros_sem_coluna.csv
 
 # Salvando o relatório em um arquivo .txt
 python3 -m codigo.main dados/cadastros_exemplo.csv relatorios/relatorio.txt
+```
+
+## Como Executar os Testes
+
+A partir da pasta `ValidaCad/`, execute:
+
+```bash
+python3 -m unittest discover -s testes -v
+```
+
+No Windows:
+
+```powershell
+py -m unittest discover -s testes -v
+```
+
+Resultado esperado:
+
+```text
+Ran 10 tests
+OK
 ```
