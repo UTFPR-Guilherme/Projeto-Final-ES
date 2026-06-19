@@ -30,7 +30,10 @@ class ValidadorDuplicados(Validador):
             valor = registro.valor(campo)
             if valor is None or valor.strip() == "":
                 continue
-            chave = "".join(valor.split()).lower()  # normaliza p/ comparação
+            if campo == "cpf":
+                chave = "".join(c for c in valor if c.isdigit())
+            else:
+                chave = "".join(valor.split()).lower()
             if chave in vistos:
                 resultado.adicionar_erro(ErroValidacao(
                     linha=registro.linha,
